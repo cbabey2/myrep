@@ -69,7 +69,3 @@ myrep/
 - Include additional filtering options (by city, name search)
 - Add data visualization (charts/plots)
 - Export filtered results
-
----
-
-"Line added from Github"

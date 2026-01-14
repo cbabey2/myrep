@@ -1,6 +1,7 @@
+
 # Define UI for application
 ui <- fluidPage(
-  titlePanel("Simple Shiny App with Hardcoded Data Frame"),
+  titlePanel("Name & Demographic Search by Age"),
   
   sidebarLayout(
     sidebarPanel(
@@ -9,12 +10,33 @@ ui <- fluidPage(
                   label = "Minimum Age:", 
                   min = 20, 
                   max = 50, 
-                  value = 25)
+                  value = 25
+    ),
+
+      selectInput(
+      inputId = "city",
+      label = "City", 
+      choices = c("All", unique(df$City)),
+      selected = "All"
     ),
     
-    mainPanel(
+      textInput(
+        inputId = "nameQuery",
+        label ="Name",
+        value = ""
+        )
+      ),
+
+  mainPanel(
       # Output the table
-      tableOutput("table")
+      tableOutput("table"),
+      textOutput("name_message"),
+      tableOutput("name_summary")
     )
   )
 )
+
+
+
+
+

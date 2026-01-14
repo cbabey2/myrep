@@ -9,7 +9,17 @@ server <- function(input, output) {
     }
     filtered_df
   })
+  
   output$name_summary <- renderTable({
+    if (nchar(trimws(input$nameQuery)) == 0) {
+      return(
+        data.frame(
+          Statistic = c("Min", "Median", "Mean", "Max"),
+          Age = c("-", "-", "-", "-")
+        )
+      )
+    }
+    
     matches <- df[tolower(df$Name) == tolower(trimws(input$nameQuery)), ]
     ages <- matches$Age
     data.frame(

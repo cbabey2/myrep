@@ -10,23 +10,30 @@ ui <- fluidPage(
                   label = "Minimum Age:", 
                   min = 20, 
                   max = 50, 
-                  value = 25)
+                  value = 25
     ),
-    
-    sidebarPanel(
+
       selectInput(
       inputId = "city",
       label = "City", 
       choices = c("All", unique(df$City)),
-      selected = "All")
-    )
-  ),
+      selected = "All"
+    ),
     
+      textInput(
+        inputId = "nameQuery",
+        label ="Name",
+        value = ""
+        )
+      ),
+
   mainPanel(
       # Output the table
-      tableOutput("table")
+      tableOutput("table"),
+      tableOutput("name_summary")
     )
   )
+)
 
 
 

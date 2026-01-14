@@ -30,6 +30,7 @@ ui <- fluidPage(
   mainPanel(
       # Output the table
       tableOutput("table"),
+      textOutput("name_message"),
       tableOutput("name_summary")
     )
   )

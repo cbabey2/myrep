@@ -1,6 +1,7 @@
+
 # Define UI for application
 ui <- fluidPage(
-  titlePanel("Simple Shiny App with Hardcoded Data Frame"),
+  titlePanel("Name & Demographic Search by Age"),
   
   sidebarLayout(
     sidebarPanel(
@@ -18,3 +19,5 @@ ui <- fluidPage(
     )
   )
 )
+
+

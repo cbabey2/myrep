@@ -13,11 +13,22 @@ ui <- fluidPage(
                   value = 25)
     ),
     
-    mainPanel(
+    sidebarPanel(
+      selectInput(
+      inputId = "city",
+      label = "City", 
+      choices = c("All", unique(df$City)),
+      selected = "All")
+    )
+  ),
+    
+  mainPanel(
       # Output the table
       tableOutput("table")
     )
   )
-)
+
+
+
 
 

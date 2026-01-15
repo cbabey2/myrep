@@ -2,7 +2,10 @@
 # Define UI for application
 ui <- navbarPage(
   title = "Age x City Search",
-  
+    # Include the CSS file
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+  ),
   tabPanel(
     titlePanel("Name & Demographic Search by Age"),
     sidebarLayout(

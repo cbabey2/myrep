@@ -31,30 +31,33 @@ ui <- navbarPage(
   
     tabPanel(
       titlePanel("Name Summary Statistics"),
-      sidebarLayout(
-        sidebarPanel(
+      mainPanel(
+        wellPanel(
+          h3("Name Summary"),
           textInput(
            inputId = "nameQuery",
            label ="Name",
            value = ""
         ),
+        textOutput("name_message"),
+        tableOutput("name_summary")
+        ),
+        
+      wellPanel(
+        h3("City Summary"),
         selectInput(
           inputId = "cityQuery",
           label = "City:",
           choices = c("", sort(unique(df$City))),
           selected = ""
-        )
       ),
-
-  mainPanel(
-      textOutput("name_message"),
-      tableOutput("name_summary"),
       textOutput("city_message"),
       tableOutput("city_summary")
       )
     )
   )
 )
+
 
 
 

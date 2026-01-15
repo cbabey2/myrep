@@ -1,6 +1,8 @@
 
 # Define server logic
 server <- function(input, output) {
+  
+  ### NAME SUMMARY STATS ###
   output$table <- renderTable({
     # Filter the data frame based on the age threshold
     filtered_df <- df[df$Age >= input$ageThreshold, ] 
@@ -36,6 +38,36 @@ server <- function(input, output) {
     }
     
     matches <- df[tolower(df$Name) == tolower(trimws(input$nameQuery)), ]
+    if (nrow(matches) == 0) return(NULL)
+    
+    ages <- matches$Age
+    
+    data.frame(
+      Statistic = c("Min", "Median", "Mean", "Max"),
+      Age = c(min(ages), median(ages), mean(ages), max(ages))
+    )
+  })
+  
+  ### CITY SUMMARY STATS ###
+  
+  output$city_message <- renderText({
+    city <- trimws(input$cityQuery)
+    if (nchar(city) == 0) return("")
+    matches <- df[df$City == city, ]
+    if (nrow(matches) == 0) "No data for this city" else ""
+  })
+  
+  output$city_summary <- renderTable({
+    city <- trimws(input$cityQuery)
+    
+    if (nchar(city) == 0) {
+      return(data.frame(
+        Statistic = c("Min", "Median", "Mean", "Max"),
+        Age = c("-", "-", "-", "-")
+      ))
+    }
+    
+    matches <- df[df$City == city, ]
     if (nrow(matches) == 0) return(NULL)
     
     ages <- matches$Age

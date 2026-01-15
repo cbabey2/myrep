@@ -36,13 +36,21 @@ ui <- navbarPage(
           textInput(
            inputId = "nameQuery",
            label ="Name",
-            value = ""
+           value = ""
+        ),
+        selectInput(
+          inputId = "cityQuery",
+          label = "City:",
+          choices = c("", sort(unique(df$City))),
+          selected = ""
         )
       ),
 
   mainPanel(
       textOutput("name_message"),
-      tableOutput("name_summary")
+      tableOutput("name_summary"),
+      textOutput("city_message"),
+      tableOutput("city_summary")
       )
     )
   )

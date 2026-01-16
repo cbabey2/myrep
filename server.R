@@ -31,8 +31,8 @@ server <- function(input, output) {
     if (nchar(trimws(input$nameQuery)) == 0) {
       return(
         data.frame(
-          Statistic = c("Min", "Median", "Mean", "Max"),
-          Age = c("-", "-", "-", "-")
+          Statistic = c("n","% of total", "Min", "Median", "Mean", "Max"),
+          Estimate = c("-", "-", "-", "-","-","-")
         )
       )
     }
@@ -41,10 +41,18 @@ server <- function(input, output) {
     if (nrow(matches) == 0) return(NULL)
     
     ages <- matches$Age
+    n <- nrow(matches)
+    pct <- round(100*n/ nrow(df),1)
     
     data.frame(
-      Statistic = c("Min", "Median", "Mean", "Max"),
-      Age = c(min(ages), median(ages), mean(ages), max(ages))
+      Statistic = c("n","% of total","Min", "Median", "Mean", "Max"),
+      Estimate = c(
+        n,
+        paste(pct, "%", sep = ""),
+        min(ages), 
+        median(ages), 
+        mean(ages), 
+        max(ages))
     )
   })
   
@@ -83,8 +91,8 @@ server <- function(input, output) {
     
     if (is.null(cities) || length(cities) == 0) {
       return(data.frame(
-        Statistic = c("Min", "Median", "Mean", "Max"),
-        Age = c("-", "-", "-", "-")
+        Statistic = c("n","% of total","Min", "Median", "Mean", "Max"),
+        Estimate = c("-", "-", "-", "-", "-", "-")
       ))
     }
     
@@ -92,10 +100,17 @@ server <- function(input, output) {
     if (nrow(matches) == 0) return(NULL)
 
     ages <- matches$Age
+    n <- nrow(matches)
+    pct <- round (100*n/ nrow(df), 1)
     
     data.frame(
-      Statistic = c("Min", "Median", "Mean", "Max"),
-      Age = c(min(ages), median(ages), mean(ages), max(ages))
+      Statistic = c("n","% of total", "Min", "Median", "Mean", "Max"),
+      Estimate = c(n,
+                   paste(pct,"%",""),
+                   min(ages), 
+                   median(ages), 
+                   mean(ages), 
+                   max(ages))
     )
   })
     

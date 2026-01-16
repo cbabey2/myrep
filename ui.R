@@ -37,28 +37,53 @@ ui <- navbarPage(
       mainPanel(
         wellPanel(
           h3("Name Summary"),
-          textInput(
-           inputId = "nameQuery",
-           label ="Name",
-           value = ""
+          fluidRow(
+            column(
+              3,
+              textInput(
+                inputId = "nameQuery",
+                label ="Name",
+                value = ""
+            ),
+            textOutput("name_message")
+          ),
+          column(
+            3,
+            tableOutput("name_summary")
+          ),
+          column(
+            6,
+            plotOutput("name_hist"))
+          )
         ),
-        textOutput("name_message"),
-        tableOutput("name_summary"),
-        plotOutput("name_hist")
-        ),
+       
         
       wellPanel(
         h3("City Summary"),
-        style = "max-height: 180px; overflow-y: auto;",
-        checkboxGroupInput(
-          inputId = "cityQuery",
-          label = "Cities:",
-          choices = sort(unique(df$City)),
-          selected = NULL
-      ),
-      textOutput("city_message"),
-      tableOutput("city_summary"),
-      plotOutput("city_hist")
+        uiOutput("city_message"),
+        fluidRow(
+          column(
+            3,
+            div(
+              style = "max-height: 180px; overflow-y: auto;",
+              checkboxGroupInput(
+                inputId = "cityQuery",
+                label = "Cities:",
+                choices = sort(unique(df$City)),
+                selected = NULL
+            )
+          )
+        ),
+        
+        column(
+          3,
+          tableOutput("city_summary")
+        ),
+        column(
+          6,
+          plotOutput("city_hist")
+        )
+        )
       )
     )
   )

@@ -78,13 +78,13 @@ server <- function(input, output) {
 
   ### CITY SUMMARY STATS ###
   
-  output$city_message <- renderText({
+  output$city_message <- renderUI({
     cities <- input$cityQuery
     
     if (is.null(cities) || length(cities) == 0) {
-      return("Select one or more cities to see summary statistics")
+      tags$p("Select one or more cities to see summary statistics",
+             class = "subtitle")
     }
-    ""
   })
   
   output$city_summary <- renderTable({
@@ -114,7 +114,6 @@ server <- function(input, output) {
       
       if (is.null(cities) || length(cities) == 0) {
         plot.new()
-        text(0,5,0.5,"Select one or more cities to see an age distribution")
         return()
       }
       

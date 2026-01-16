@@ -48,6 +48,25 @@ server <- function(input, output) {
     )
   })
   
+  output$name_hist <- renderPlot({
+    name <- trimws(input$nameQuery)
+    
+    matches <- df[tolower(df$Name) == tolower(name), ]
+    
+    if(nrow(matches) == 0) {
+      plot.new()
+      text(0.5,0.5, "")
+      return()
+    }
+    
+    hist(
+      matches$Age,
+      breaks=10,
+      main = paste("Age Distribution for", name),
+      xlab = "Age"
+    )
+  })
+  
   ### CITY SUMMARY STATS ###
   
   output$city_message <- renderText({

@@ -39,33 +39,24 @@ ui <- navbarPage(
           h3("Name Summary"),
           tags$p("Enter a name to see age distribution", class = "subtitle"),
           fluidRow(
-            column(
-              3,
-              textInput(
+            column(3,textInput(
                 inputId = "nameQuery",
                 label ="Name",
                 value = ""
             ),
             textOutput("name_message")
           ),
-          column(
-            3,
-            tableOutput("name_summary")
+          column(3,tableOutput("name_summary")
           ),
-          column(
-            6,
-            plotOutput("name_hist"))
+          column(6,plotOutput("name_hist"))
           )
         ),
        
-        
       wellPanel(
         h3("City Summary"),
         tags$p("Select one or more cities to see summary statistics", class="subtitle"),
         fluidRow(
-          column(
-            3,
-            div(
+          column(3,div(
               style = "max-height: 180px; overflow-y: auto;",
               checkboxGroupInput(
                 inputId = "cityQuery",
@@ -76,22 +67,43 @@ ui <- navbarPage(
           )
         ),
         
-        column(
-          3,
-          tableOutput("city_summary")
+        column(3,tableOutput("city_summary")),
+        column(6,plotOutput("city_hist"))
+        )
+      )
+    )
+  ),
+  
+  tabPanel(
+    titlePanel("Name Comparison Across Cities"),
+    mainPanel(
+      wellPanel(
+        h3("Name x City Box Plot"),
+        
+        tags$p("Write one name", class = "subtitle"),
+        textInput(
+          inputId = "nameCityQuery",
+          label = NULL,
+          value = "",
+          placeholder = "Enter a name"
         ),
-        column(
-          6,
-          plotOutput("city_hist")
-        )
-        )
+        
+        tags$p("Pick one or more cities", class = "subtitle"),
+        div(
+          style = "max-height: 180px; overflow-y: auto;",
+          checkboxGroupInput(
+            inputId = "cityNameQuery",
+            label = NULL,
+            choices = sort(unique(df$City)),
+            selected = NULL
+          )
+        ),
+        uiOutput("name_city_boxplot_message"),
+        plotOutput("name_city_boxplot")
       )
     )
   )
 )
-
-
-
 
 
 

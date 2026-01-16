@@ -143,7 +143,47 @@ server <- function(input, output) {
         main = title_text,
         xlab="Age"
       )
-    })} 
+    })
+    
+    output$name_city_boxplot_message <- renderUI({
+      cities <- input$cityNameQuery
+      
+      if (is.null(cities) || length(cities) == 0) {
+        tags$p("Pick at least one city to generate a box plot", class = "subtitle")
+      }
+    })
+    
+    output$name_city_boxplot <- renderPlot({
+      name <- trimws(input$nameCityQuery)
+      cities <- input$cityNameQuery
+      
+      if (is.null(cities) || length(cities) == 0 || nchar(name) == 0) {
+        plot.new()
+        return()
+      }
+    
+      matches <- df[
+        tolower(df$Name) == tolower(name) & df$City %in% cities,
+      ]
+      
+      if (nrow(matches) == 0) {
+        plot.new()
+        text(0.5, 0.5, "No data for that name in the selected cities")
+        return()
+      }
+      
+      matches$City <- factor(matches$City, levels = cities)
+      
+      boxplot(
+        Age ~ City,
+        data = matches,
+        main = paste("Age Distribution for", name, "by City"),
+        xlab = "City",
+        ylab = "Age"
+      )
+    })
+}
+
 
 
 

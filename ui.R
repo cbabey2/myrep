@@ -1,13 +1,13 @@
 
 # Define UI for application
 ui <- navbarPage(
-  title = "Age x City Search",
+  title = "Visualizing Age Data (by Name and City)",
     # Include the CSS file
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
   ),
   tabPanel(
-    titlePanel("Name & Demographic Search by Age"),
+    titlePanel("Name & City Search by Age"),
     sidebarLayout(
       sidebarPanel(
         # Slider input to filter by minimum age
@@ -33,7 +33,7 @@ ui <- navbarPage(
   
   
     tabPanel(
-      titlePanel("Name Summary Statistics"),
+      titlePanel("Summary Statistics"),
       mainPanel(
         wellPanel(
           h3("Name Summary"),
@@ -75,7 +75,7 @@ ui <- navbarPage(
   ),
   
   tabPanel(
-    titlePanel("Name Comparison Across Cities"),
+    titlePanel("Boxplot Comparisons"),
     mainPanel(
       wellPanel(
         h3("Name x City Box Plot"),
@@ -100,6 +100,28 @@ ui <- navbarPage(
         ),
         uiOutput("name_city_boxplot_message"),
         plotOutput("name_city_boxplot")
+      )
+    )
+  ),
+  
+  tabPanel(
+    titlePanel("Name Vibes"),
+    mainPanel(
+      wellPanel(
+        h3("Find Your Name’s Vibe"),
+        
+        tags$p(
+          "Enter a name and we’ll tell you its energy.",
+          class = "subtitle"
+        ),
+        
+        textInput(
+          inputId = "nameVibeQuery",
+          label = NULL,
+          value = "",
+          placeholder = "Enter a name..."
+        ),
+        uiOutput("name_vibe")
       )
     )
   )

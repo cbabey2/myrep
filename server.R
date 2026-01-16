@@ -81,7 +81,48 @@ server <- function(input, output) {
     )
   })
   
+  ### WHATS MY NAMES VIBE? 
 
+  output$name_vibe <- renderUI({
+    name <- trimws(input$nameVibeQuery)
+    
+    if (nchar(name) == 0) return(NULL)
+    
+    matches <- df[tolower(df$Name) == tolower(name), ]
+    if (nrow(matches) == 0) return(NULL)
+    
+    mean_age <- mean(matches$Age, na.rm = TRUE)
+    
+    vibe <- if (mean_age < 30) {
+      list(
+        label = "Modern",
+        blurb = "This name is living its best life right now. It's everywhere among younger people and definitely knows how to use TikTok."
+      )
+    } else if (mean_age <= 50) {
+      list(
+        label = "Classic",
+        blurb = "This name has seen some things. It's reliable, well-liked, and comfortably sitting in its prime years."
+      )
+    } else {
+      list(
+        label = "Vintage",
+        blurb = "This name has stories. It peaked a while ago, carries strong nostalgia, and absolutely deserves a comeback."
+      )
+    }
+    
+    tags$div(
+      class = "vibe-box",
+      tags$strong(paste("Name vibe:", vibe$label)),
+      tags$p(vibe$blurb),
+      tags$p(
+        class = "vibe-note",
+        paste0("Based on mean age (", round(mean_age, 1), "). Vibes only.")
+      )
+    )
+  })
+  
+  
+  
 
   ### CITY SUMMARY STATS ###
   

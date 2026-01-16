@@ -47,6 +47,18 @@ h3 {
   margin-top: 6px;
 }
 
+.vibe-modern {
+  background: linear-gradient(135deg, rgba(0,255,180,0.22), rgba(120,140,255,0.18));
+}
+
+.vibe-classic {
+  background: linear-gradient(135deg, rgba(80,160,255,0.20), rgba(255,210,90,0.18));
+}
+
+.vibe-vintage {
+  background: linear-gradient(135deg, rgba(190,120,255,0.20), rgba(255,140,160,0.16));
+}
+
 table {
   border-collapse: collapse;
   width: 100%;

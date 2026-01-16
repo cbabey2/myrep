@@ -110,8 +110,10 @@ server <- function(input, output) {
       )
     }
     
+    vibe_class <- paste0("vibe-", tolower(vibe$label))
+    
     tags$div(
-      class = "vibe-box",
+      class = paste("vibe-box", vibe_class),
       tags$strong(paste("Name vibe:", vibe$label)),
       tags$p(vibe$blurb),
       tags$p(

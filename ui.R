@@ -14,7 +14,7 @@ ui <- navbarPage(
         sliderInput("ageThreshold", 
                     label = "Minimum Age:", 
                     min = 20, 
-                    max = 50, 
+                    max = 65, 
                     value = 25
         ),
         
@@ -105,7 +105,7 @@ ui <- navbarPage(
   ),
   
   tabPanel(
-    titlePanel("Name Vibes"),
+    titlePanel("Name Vibes (For fun!)"),
     mainPanel(
       wellPanel(
         h3("Find Your Name’s Vibe"),

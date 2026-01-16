@@ -49,11 +49,12 @@ ui <- navbarPage(
         
       wellPanel(
         h3("City Summary"),
-        selectInput(
+        style = "max-height: 180px; overflow-y: auto;",
+        checkboxGroupInput(
           inputId = "cityQuery",
-          label = "City:",
-          choices = c("", sort(unique(df$City))),
-          selected = ""
+          label = "Cities:",
+          choices = sort(unique(df$City)),
+          selected = NULL
       ),
       textOutput("city_message"),
       tableOutput("city_summary"),

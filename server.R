@@ -79,45 +79,27 @@ server <- function(input, output) {
   ### CITY SUMMARY STATS ###
   
   output$city_message <- renderText({
-    city <- trimws(input$cityQuery)
-    if (nchar(city) == 0) return("")
-    matches <- df[df$City == city, ]
-    if (nrow(matches) == 0) "No data for this city" else ""
+    cities <- input$cityQuery
+    
+    if (is.null(cities) || length(cities) == 0) {
+      return("Select one or more cities to see summary statistics")
+    }
+    ""
   })
   
   output$city_summary <- renderTable({
-    city <- trimws(input$cityQuery)
+    cities <- input$cityQuery
     
-    if (nchar(city) == 0) {
+    if (is.null(cities) || length(cities) == 0) {
       return(data.frame(
         Statistic = c("Min", "Median", "Mean", "Max"),
         Age = c("-", "-", "-", "-")
       ))
     }
     
-    output$city_hist <- renderPlot({
-      city <- trimws(input$cityQuery)
-      
-      
-      matches <- df[df$City == city, ]
-      
-      if (nrow(matches) == 0) {
-        plot.new()
-        test(0.5,0.5, "")
-        return()
-      }
-      
-      hist(
-        matches$Age,
-        breaks=10,
-        main = paste("Age distribution in",city),
-        xlab="Age"
-      )
-    })
-    
-    matches <- df[df$City == city, ]
+    matches <- df[df$City %in% cities, ]
     if (nrow(matches) == 0) return(NULL)
-    
+
     ages <- matches$Age
     
     data.frame(
@@ -125,6 +107,39 @@ server <- function(input, output) {
       Age = c(min(ages), median(ages), mean(ages), max(ages))
     )
   })
-}
+    
+  
+    output$city_hist <- renderPlot({
+      cities <- input$cityQuery
+      
+      if (is.null(cities) || length(cities) == 0) {
+        plot.new()
+        text(0,5,0.5,"Select one or more cities to see an age distribution")
+        return()
+      }
+      
+      matches <- df[df$City %in% cities, ]
+      
+      if (nrow(matches) == 0) {
+        plot.new()
+        text(0.5,0.5, "")
+        return()
+      }
+      
+      title_text <- if(length(cities) <= 3) {
+        paste("Age Distribution in", paste(cities, collapse = ", "))
+      } else {
+        paste("Age distribution in", length(cities), "cities")
+      }
+      
+      hist(
+        matches$Age,
+        breaks=10,
+        main = title_text,
+        xlab="Age"
+      )
+    })} 
+
+
 
 

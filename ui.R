@@ -43,7 +43,8 @@ ui <- navbarPage(
            value = ""
         ),
         textOutput("name_message"),
-        tableOutput("name_summary")
+        tableOutput("name_summary"),
+        plotOutput("name_hist")
         ),
         
       wellPanel(

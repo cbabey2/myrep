@@ -95,6 +95,26 @@ server <- function(input, output) {
       ))
     }
     
+    output$city_hist <- renderPlot({
+      city <- trimws(input$cityQuery)
+      
+      
+      matches <- df[df$City == city, ]
+      
+      if (nrow(matches) == 0) {
+        plot.new()
+        test(0.5,0.5, "")
+        return()
+      }
+      
+      hist(
+        matches$Age,
+        breaks=10,
+        main = paste("Age distribution in",city),
+        xlab="Age"
+      )
+    })
+    
     matches <- df[df$City == city, ]
     if (nrow(matches) == 0) return(NULL)
     

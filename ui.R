@@ -56,7 +56,8 @@ ui <- navbarPage(
           selected = ""
       ),
       textOutput("city_message"),
-      tableOutput("city_summary")
+      tableOutput("city_summary"),
+      plotOutput("city_hist")
       )
     )
   )

@@ -53,7 +53,6 @@ server <- function(input, output) {
     
     if (nchar(name) == 0) {
       plot.new()
-      text(0.5, 0.5, "Enter a name to see an age distribution")
       return()
     }
     
@@ -78,14 +77,6 @@ server <- function(input, output) {
 
   ### CITY SUMMARY STATS ###
   
-  output$city_message <- renderUI({
-    cities <- input$cityQuery
-    
-    if (is.null(cities) || length(cities) == 0) {
-      tags$p("Select one or more cities to see summary statistics",
-             class = "subtitle")
-    }
-  })
   
   output$city_summary <- renderTable({
     cities <- input$cityQuery

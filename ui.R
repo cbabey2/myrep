@@ -37,6 +37,7 @@ ui <- navbarPage(
       mainPanel(
         wellPanel(
           h3("Name Summary"),
+          tags$p("Enter a name to see age distribution", class = "subtitle"),
           fluidRow(
             column(
               3,
@@ -60,7 +61,7 @@ ui <- navbarPage(
         
       wellPanel(
         h3("City Summary"),
-        uiOutput("city_message"),
+        tags$p("Select one or more cities to see summary statistics", class="subtitle"),
         fluidRow(
           column(
             3,

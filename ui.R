@@ -67,8 +67,10 @@ ui <- navbarPage(
             ),
             textOutput("name_message")
           ),
+          downloadButton("dl_name_summary", "Download Name Summary (CSV)"),
           column(3,tableOutput("name_summary")
           ),
+          downloadButton("dl_name_hist", "Download Histogram (PNG)"),
           column(6,plotOutput("name_hist"))
           )
         ),
@@ -87,7 +89,6 @@ ui <- navbarPage(
             )
           )
         ),
-        
         column(3,tableOutput("city_summary")),
         column(6,plotOutput("city_hist"))
         )
@@ -120,7 +121,8 @@ ui <- navbarPage(
           )
         ),
         uiOutput("name_city_boxplot_message"),
-        plotOutput("name_city_boxplot")
+        plotOutput("name_city_boxplot"), 
+        downloadButton("dl_boxplot", "Download Boxplot (PNG)")
       )
     )
   ),

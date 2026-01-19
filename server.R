@@ -97,9 +97,51 @@ server <- function(input, output, session) {
     )
   })
   
+  ## NAME SUMMARY LOGIC ###
   
+  name_summary_df <- reactive({
+    d <- data()
+    nm <- trimws(input$nameQuery)
+    
+    if (nchar(nm) == 0) {
+      return(data.frame(
+        Statistic = c("n","% of total","Min","Median","Mean","Max"),
+        Estimate = c("-", "-", "-", "-", "-", "-")
+      ))
+    }
+    
+    matches <- d[tolower(d$Name) == tolower(nm), , drop = FALSE]
+    if (nrow(matches) == 0) return(NULL)
+    
+    ages <- matches$Age
+    n <- nrow(matches)
+    pct <- round(100 * n / nrow(d), 1)
+    
+    data.frame(
+      Statistic = c("n","% of total","Min","Median","Mean","Max"),
+      Estimate  = c(n, paste0(pct, "%"), min(ages), median(ages), mean(ages), max(ages))
+    )
+  })
   
+  ### HISTOGRAM LOGIC ###
   
+  plot_name_hist <- function(d, nm) {
+    matches <- d[tolower(d$Name) == tolower(nm), , drop = FALSE]
+    
+    if (nrow(matches) == 0) {
+      plot.new()
+      text(0.5, 0.5, "No data for that name")
+      return()
+    }
+    
+    hist(
+      matches$Age,
+      breaks = seq(20, 70, by = 5),
+      xlim = c(20, 70),
+      main = paste("Age Distribution for", nm),
+      xlab = "Age"
+    )
+  }
   
   ### NAME SUMMARY STATS ###
   
@@ -135,109 +177,91 @@ server <- function(input, output, session) {
   })
   
   output$name_summary <- renderTable({
-    if (nchar(trimws(input$nameQuery)) == 0) {
-      return(
-        data.frame(
-          Statistic = c("n","% of total", "Min", "Median", "Mean", "Max"),
-          Estimate = c("-", "-", "-", "-","-","-")
-        )
-      )
-    }
-    
-    d <- data()
-    matches <- d[tolower(d$Name) == tolower(trimws(input$nameQuery)), ]
-    if (nrow(matches) == 0) return(NULL)
-    
-    ages <- matches$Age
-    n <- nrow(matches)
-    pct <- round(100*n/ nrow(d),1)
-    
-    data.frame(
-      Statistic = c("n","% of total","Min", "Median", "Mean", "Max"),
-      Estimate = c(
-        n,
-        paste(pct, "%", sep = ""),
-        min(ages), 
-        median(ages), 
-        mean(ages), 
-        max(ages))
-    )
+    name_summary_df()
   })
+  
+  output$dl_name_summary <- downloadHandler(
+    filename = function() paste0("name_summary_", Sys.Date(), ".csv"),
+    content = function(file) {
+      out <- name_summary_df()
+      if (is.null(out)) out <- data.frame(Message = "No matching rows for this name")
+      write.csv(out, file, row.names = FALSE)
+    }
+  )
+  
   
   output$name_hist <- renderPlot({
-    name <- trimws(input$nameQuery)
+    d <- data()
+    nm <- trimws(input$nameQuery)
     
-    if (nchar(name) == 0) {
+    if (nchar(nm) == 0) {
       plot.new()
       return()
     }
     
-    d <- data()
-    matches <- d[tolower(d$Name) == tolower(name), ]
-    
-    
-    if(nrow(matches) == 0) {
-      plot.new()
-      text(0.5,0.5, "")
-      return()
-    }
-    
-    hist(
-      matches$Age,
-      breaks= seq(20, 70, by = 5),
-      xlim= c(20,70),
-      main = paste("Age Distribution for", name),
-      xlab = "Age"
-    )
+    plot_name_hist(d, nm)
   })
   
-  ### WHATS MY NAMES VIBE? 
-
-  output$name_vibe <- renderUI({
-    name <- trimws(input$nameVibeQuery)
-    
-    if (nchar(name) == 0) return(NULL)
-    
-    d <- data()
-    matches <- d[tolower(d$Name) == tolower(name), ]
-    if (nrow(matches) == 0) return(NULL)
-    
-    mean_age <- mean(matches$Age, na.rm = TRUE)
-    
-    vibe <- if (mean_age < 30) {
-      list(
-        label = "Modern",
-        blurb = "This name is living its best life right now. It's everywhere among younger people and definitely knows how to use TikTok."
-      )
-    } else if (mean_age <= 50) {
-      list(
-        label = "Classic",
-        blurb = "This name has seen some things. It's reliable, well-liked, and comfortably sitting in its prime years."
-      )
-    } else {
-      list(
-        label = "Vintage",
-        blurb = "This name has stories. It peaked a while ago, carries strong nostalgia, and absolutely deserves a comeback."
-      )
+  output$dl_name_hist <- downloadHandler(
+    filename = function() paste0("name_hist_", Sys.Date(), ".png"),
+    content = function(file) {
+      d <- data()
+      nm <- trimws(input$nameQuery)
+      
+      png(file, width = 900, height = 600, res = 120)
+      if (nchar(nm) == 0) {
+        plot.new()
+        text(0.5, 0.5, "Enter a name first")
+      } else {
+        plot_name_hist(d, nm)
+      }
+      dev.off()
     }
-    
-    vibe_class <- paste0("vibe-", tolower(vibe$label))
-    
-    tags$div(
-      class = paste("vibe-box", vibe_class),
-      tags$strong(paste("Name vibe:", vibe$label)),
-      tags$p(vibe$blurb),
-      tags$p(
-        class = "vibe-note",
-        paste0("Based on mean age (", round(mean_age, 1), "). Vibes only.")
-      )
-    )
-  })
-  
+  )
   
   
 
   ### CITY SUMMARY STATS ###
+  
+  ### BOXPLOT LOGIC ###
+  
+  plot_name_city_box <- function(d, nm, cities) {
+    matches <- d[
+      tolower(d$Name) == tolower(nm) & d$City %in% cities,
+      ,
+      drop = FALSE
+    ]
+    
+    if (nrow(matches) == 0) {
+      plot.new()
+      text(0.5, 0.5, "No data for that name in selected cities")
+      return()
+    }
+    
+    matches$City <- factor(matches$City, levels = cities)
+    
+    boxplot(
+      Age ~ City,
+      data = matches,
+      main = paste("Age Distribution for", nm, "by City"),
+      xlab = "City",
+      ylab = "Age"
+    )
+  }
+  
+  output$name_city_boxplot <- renderPlot({
+    d <- data()
+    nm <- trimws(input$nameCityQuery)
+    cities <- input$cityNameQuery
+    
+    if (is.null(cities) || length(cities) == 0 || nchar(nm) == 0) {
+      plot.new()
+      return()
+    }
+    
+    plot_name_city_box(d, nm, cities)
+  })
+
   
   
   output$city_summary <- renderTable({
@@ -302,48 +326,80 @@ server <- function(input, output, session) {
     })
     
     output$name_city_boxplot_message <- renderUI({
+      nm <- trimws(input$nameCityQuery)
       cities <- input$cityNameQuery
       
-      if (is.null(cities) || length(cities) == 0) {
+      if (nchar(nm) == 0) {
+        tags$p("Enter a name to generate a box plot", class = "subtitle")
+      } else if (is.null(cities) || length(cities) == 0) {
         tags$p("Pick at least one city to generate a box plot", class = "subtitle")
       }
     })
     
-    output$name_city_boxplot <- renderPlot({
-      name <- trimws(input$nameCityQuery)
-      cities <- input$cityNameQuery
-      
-      if (is.null(cities) || length(cities) == 0 || nchar(name) == 0) {
-        plot.new()
-        return()
-      }
     
-      d <- data()
-      matches <- d[
-        tolower(d$Name) == tolower(name) & d$City %in% cities,
-        ,
-        drop = FALSE
-      ]
-      
-      if (nrow(matches) == 0) {
-        plot.new()
-        text(0.5, 0.5, "No data for that name in the selected cities")
-        return()
+    
+    output$dl_boxplot <- downloadHandler(
+      filename = function() paste0("name_city_boxplot_", Sys.Date(), ".png"),
+      content = function(file) {
+        d <- data()
+        nm <- trimws(input$nameCityQuery)
+        cities <- input$cityNameQuery
+        
+        png(file, width = 1000, height = 650, res = 120)
+        if (is.null(cities) || length(cities) == 0 || nchar(nm) == 0) {
+          plot.new()
+          text(0.5, 0.5, "Enter a name and select at least one city")
+        } else {
+          plot_name_city_box(d, nm, cities)
+        }
+        dev.off()
       }
-      
-      matches$City <- factor(matches$City, levels = cities)
-      
-      boxplot(
-        Age ~ City,
-        data = matches,
-        main = paste("Age Distribution for", name, "by City"),
-        xlab = "City",
-        ylab = "Age"
-      )
-    })
+    )
+
+
+### WHATS MY NAMES VIBE? 
+
+output$name_vibe <- renderUI({
+  name <- trimws(input$nameVibeQuery)
+  
+  if (nchar(name) == 0) return(NULL)
+  
+  d <- data()
+  matches <- d[tolower(d$Name) == tolower(name), ]
+  if (nrow(matches) == 0) return(NULL)
+  
+  mean_age <- mean(matches$Age, na.rm = TRUE)
+  
+  vibe <- if (mean_age < 30) {
+    list(
+      label = "Modern",
+      blurb = "This name is living its best life right now. It's everywhere among younger people and definitely knows how to use TikTok."
+    )
+  } else if (mean_age <= 50) {
+    list(
+      label = "Classic",
+      blurb = "This name has seen some things. It's reliable, well-liked, and comfortably sitting in its prime years."
+    )
+  } else {
+    list(
+      label = "Vintage",
+      blurb = "This name has stories. It peaked a while ago, carries strong nostalgia, and absolutely deserves a comeback."
+    )
+  }
+  
+  vibe_class <- paste0("vibe-", tolower(vibe$label))
+  
+  tags$div(
+    class = paste("vibe-box", vibe_class),
+    tags$strong(paste("Name vibe:", vibe$label)),
+    tags$p(vibe$blurb),
+    tags$p(
+      class = "vibe-note",
+      paste0("Based on mean age (", round(mean_age, 1), "). Vibes only.")
+    )
+  )
+})
+
+
 }
-
-
-
-
 

@@ -46,6 +46,7 @@ ui <- navbarPage(
       ),
       
         mainPanel(
+          downloadButton("download_filtered", "Download filtered CSV"),
           tableOutput("table")
         )
       )

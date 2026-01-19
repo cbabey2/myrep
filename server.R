@@ -47,6 +47,28 @@ server <- function(input, output, session) {
     data_rv()
     })
   
+  # Filtered table data (used by table + download)
+  filtered_table_df <- reactive({
+    d <- data()
+    
+    filtered_df <- d[d$Age >= input$ageThreshold, ]
+    
+    if (input$city != "All") {
+      filtered_df <- filtered_df[filtered_df$City == input$city, ]
+    }
+    
+    name <- trimws(input$tableNameQuery)
+    if (nchar(name) > 0) {
+      filtered_df <- filtered_df[
+        tolower(filtered_df$Name) == tolower(name),
+        ,
+        drop = FALSE
+      ]
+    }
+    
+    filtered_df
+  })
+  
   observe({
     d <- data()
     req(d)
@@ -81,30 +103,21 @@ server <- function(input, output, session) {
   
   ### NAME SUMMARY STATS ###
   
+    # defined earlier#
+  
   output$table <- renderTable({
-    
-    # Filter the data frame based on the age threshold
-    
-    d <- data()
-    filtered_df <- d[d$Age >= input$ageThreshold, ] 
-    if (input$city != "All") {
-      filtered_df <- filtered_df[filtered_df$City == input$city, ]
-    }
-    
-    name <- trimws(input$tableNameQuery)
-    if (nchar(name) > 0) {
-      filtered_df <- filtered_df[
-        tolower(as.character(filtered_df$Name)) == tolower(name),
-        , 
-        drop = FALSE
-      ]
-    }
-    
-    filtered_df
+    filtered_table_df()
   })
   
+  output$download_filtered <- downloadHandler(
+    filename = function() {
+      paste0("filtered_results_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      write.csv(filtered_table_df(), file, row.names = FALSE)
+    }
+  )
 
-  
   output$name_message <- renderText({
     name <- trimws(input$tableNameQuery)
     

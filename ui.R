@@ -6,8 +6,9 @@ ui <- navbarPage(
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
   ),
+  
   tabPanel(
-    titlePanel("Name & City Search by Age"),
+    "Name & City Search by Age",
     sidebarLayout(
       sidebarPanel(
         # Slider input to filter by minimum age
@@ -23,8 +24,16 @@ ui <- navbarPage(
           label = "City", 
           choices = c("All", unique(df$City)),
           selected = "All"
-        )
       ),
+      
+      textInput(
+        inputId = "tableNameQuery",
+        label = "Name",
+        value = "",
+        placeholder = "Type a name...")
+      
+      ),
+      
         mainPanel(
           tableOutput("table")
         )
@@ -33,7 +42,7 @@ ui <- navbarPage(
   
   
     tabPanel(
-      titlePanel("Summary Statistics"),
+      "Summary Statistics",
       mainPanel(
         wellPanel(
           h3("Name Summary"),
@@ -75,7 +84,7 @@ ui <- navbarPage(
   ),
   
   tabPanel(
-    titlePanel("Boxplot Comparisons"),
+    "Boxplot Comparisons",
     mainPanel(
       wellPanel(
         h3("Name x City Box Plot"),
@@ -105,7 +114,7 @@ ui <- navbarPage(
   ),
   
   tabPanel(
-    titlePanel("Name Vibes (For fun!)"),
+    "Name Vibes (For fun!)",
     mainPanel(
       wellPanel(
         h3("Find Your Name’s Vibe"),

@@ -3,17 +3,31 @@
 server <- function(input, output) {
   
   ### NAME SUMMARY STATS ###
+  
   output$table <- renderTable({
+    
     # Filter the data frame based on the age threshold
+    
     filtered_df <- df[df$Age >= input$ageThreshold, ] 
     if (input$city != "All") {
       filtered_df <- filtered_df[filtered_df$City == input$city, ]
     }
+    
+    name <- trimws(input$tableNameQuery)
+    if (nchar(name) > 0) {
+      filtered_df <- filtered_df[
+        tolower(as.character(filtered_df$Name)) == tolower(name),
+        ,
+      ]
+    }
+    
     filtered_df
   })
+  
 
+  
   output$name_message <- renderText({
-    name <- trimws(input$nameQuery)
+    name <- trimws(input$tableNameQuery)
     
     # If empty input, no message
     if (nchar(name) == 0) return("")
@@ -75,7 +89,8 @@ server <- function(input, output) {
     
     hist(
       matches$Age,
-      breaks=10,
+      breaks= seq(20, 70, by = 5),
+      xlim= c(20,70),
       main = paste("Age Distribution for", name),
       xlab = "Age"
     )
@@ -207,6 +222,7 @@ server <- function(input, output) {
     
       matches <- df[
         tolower(df$Name) == tolower(name) & df$City %in% cities,
+        ,
       ]
       
       if (nrow(matches) == 0) {

@@ -1,6 +1,83 @@
 
 # Define server logic
-server <- function(input, output) {
+server <- function(input, output, session) {
+  
+  ### UPLOADING YOUR OWN CV, DEFINING THE DATA ###
+  
+  default_df <- df
+  data_rv <- reactiveVal(default_df)
+  
+  observeEvent(input$upload_csv, {
+    req(input$upload_csv)
+    uploaded <- tryCatch(
+      read.csv(input$upload_csv$datapath, stringsAsFactors = FALSE),
+      error = function(e) NULL
+    )
+    
+    validate(
+      need(!is.null(uploaded), "Couldn't read that CSV. Is it a valid .csv file?")
+    )
+    
+
+    required <- c("Name", "Age", "City")
+    validate(
+      need(all(required %in% names(uploaded)),
+           paste("CSV must include columns:", paste(required, collapse = ", ")))
+    )
+    
+
+    uploaded$Name <- trimws(as.character(uploaded$Name))
+    uploaded$City <- trimws(as.character(uploaded$City))
+    uploaded$Age  <- suppressWarnings(as.numeric(uploaded$Age))
+    
+    validate(
+      need(all(!is.na(uploaded$Age)), "Age column must be numeric (no letters or blanks).")
+    )
+    
+    data_rv(uploaded)
+  })
+  
+  # revert to sample data button #
+  
+  observeEvent(input$use_sample, {
+    data_rv(default_df)
+  })
+  
+  data <- reactive({
+    data_rv()
+    })
+  
+  observe({
+    d <- data()
+    req(d)
+    
+    cities <- sort(unique(d$City))
+    
+    updateSelectInput(
+      session,
+      "city",
+      choices = c("All", cities),
+      selected = "All"
+    )
+    
+    updateCheckboxGroupInput(
+      session,
+      "cityQuery",
+      choices = cities,
+      selected = NULL
+    )
+    
+    updateCheckboxGroupInput(
+      session,
+      "cityNameQuery",
+      choices = cities,
+      selected = NULL
+    )
+  })
+  
+  
+  
+  
   
   ### NAME SUMMARY STATS ###
   
@@ -8,7 +85,8 @@ server <- function(input, output) {
     
     # Filter the data frame based on the age threshold
     
-    filtered_df <- df[df$Age >= input$ageThreshold, ] 
+    d <- data()
+    filtered_df <- d[d$Age >= input$ageThreshold, ] 
     if (input$city != "All") {
       filtered_df <- filtered_df[filtered_df$City == input$city, ]
     }
@@ -17,7 +95,8 @@ server <- function(input, output) {
     if (nchar(name) > 0) {
       filtered_df <- filtered_df[
         tolower(as.character(filtered_df$Name)) == tolower(name),
-        ,
+        , 
+        drop = FALSE
       ]
     }
     
@@ -32,7 +111,8 @@ server <- function(input, output) {
     # If empty input, no message
     if (nchar(name) == 0) return("")
     
-    matches <- df[tolower(df$Name) == tolower(name), ]
+    d <- data()
+    matches <- d[tolower(d$Name) == tolower(name), ]
     
     if (nrow(matches) == 0) {
       "No data for this name"
@@ -51,12 +131,13 @@ server <- function(input, output) {
       )
     }
     
-    matches <- df[tolower(df$Name) == tolower(trimws(input$nameQuery)), ]
+    d <- data()
+    matches <- d[tolower(d$Name) == tolower(trimws(input$nameQuery)), ]
     if (nrow(matches) == 0) return(NULL)
     
     ages <- matches$Age
     n <- nrow(matches)
-    pct <- round(100*n/ nrow(df),1)
+    pct <- round(100*n/ nrow(d),1)
     
     data.frame(
       Statistic = c("n","% of total","Min", "Median", "Mean", "Max"),
@@ -78,7 +159,8 @@ server <- function(input, output) {
       return()
     }
     
-    matches <- df[tolower(df$Name) == tolower(name), ]
+    d <- data()
+    matches <- d[tolower(d$Name) == tolower(name), ]
     
     
     if(nrow(matches) == 0) {
@@ -103,7 +185,8 @@ server <- function(input, output) {
     
     if (nchar(name) == 0) return(NULL)
     
-    matches <- df[tolower(df$Name) == tolower(name), ]
+    d <- data()
+    matches <- d[tolower(d$Name) == tolower(name), ]
     if (nrow(matches) == 0) return(NULL)
     
     mean_age <- mean(matches$Age, na.rm = TRUE)
@@ -154,12 +237,13 @@ server <- function(input, output) {
       ))
     }
     
-    matches <- df[df$City %in% cities, ]
+    d <- data()
+    matches <- d[d$City %in% cities, ]
     if (nrow(matches) == 0) return(NULL)
 
     ages <- matches$Age
     n <- nrow(matches)
-    pct <- round (100*n/ nrow(df), 1)
+    pct <- round (100*n/ nrow(d), 1)
     
     data.frame(
       Statistic = c("n","% of total", "Min", "Median", "Mean", "Max"),
@@ -181,7 +265,8 @@ server <- function(input, output) {
         return()
       }
       
-      matches <- df[df$City %in% cities, ]
+      d <- data()
+      matches <- d[d$City %in% cities, ]
       
       if (nrow(matches) == 0) {
         plot.new()
@@ -220,9 +305,11 @@ server <- function(input, output) {
         return()
       }
     
-      matches <- df[
-        tolower(df$Name) == tolower(name) & df$City %in% cities,
+      d <- data()
+      matches <- d[
+        tolower(d$Name) == tolower(name) & d$City %in% cities,
         ,
+        drop = FALSE
       ]
       
       if (nrow(matches) == 0) {

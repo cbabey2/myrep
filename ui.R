@@ -11,6 +11,17 @@ ui <- navbarPage(
     "Name & City Search by Age",
     sidebarLayout(
       sidebarPanel(
+        # option to upload csv #
+        fileInput(
+          inputId = "upload_csv",
+          label = "Upload your own CSV (Name, Age, City)",
+          accept = c(".csv")
+        ),
+        
+        tags$small("Your file must include columns: Name, Age, City"),
+        actionButton("use_sample", "Use sample data"),
+        
+        
         # Slider input to filter by minimum age
         sliderInput("ageThreshold", 
                     label = "Minimum Age:", 

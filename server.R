@@ -97,6 +97,8 @@ server <- function(input, output, session) {
     )
   })
   
+  
+  
   ## NAME SUMMARY LOGIC ###
   
   name_summary_df <- reactive({
@@ -123,7 +125,7 @@ server <- function(input, output, session) {
     )
   })
   
-  ### HISTOGRAM LOGIC ###
+  ### NAME HISTOGRAM LOGIC ###
   
   plot_name_hist <- function(d, nm) {
     matches <- d[tolower(d$Name) == tolower(nm), , drop = FALSE]
@@ -249,6 +251,63 @@ server <- function(input, output, session) {
     )
   }
   
+  ### CITY SUMMARY LOGIC ###
+  city_summary_df <- reactive({
+    d <- data()
+    cities <- input$cityQuery
+    
+    if (is.null(cities) || length(cities) == 0) {
+      return(data.frame(
+        Statistic = c("n","% of total","Min","Median","Mean","Max"),
+        Estimate  = c("-", "-", "-", "-", "-", "-")
+      ))
+    }
+    
+    matches <- d[d$City %in% cities, , drop = FALSE]
+    if (nrow(matches) == 0) return(NULL)
+    
+    ages <- matches$Age
+    n <- nrow(matches)
+    pct <- round(100 * n / nrow(d), 1)
+    
+    data.frame(
+      Statistic = c("n","% of total","Min","Median","Mean","Max"),
+      Estimate  = c(
+        n,
+        paste0(pct, "%"),
+        min(ages), median(ages), mean(ages), max(ages)
+      )
+    )
+  })
+  
+  ### CITY HISTOGRAM LOGIC ###
+  
+  plot_city_hist <- function(d, cities) {
+    matches <- d[d$City %in% cities, , drop = FALSE]
+    
+    if (nrow(matches) == 0) {
+      plot.new()
+      text(0.5, 0.5, "No data for selected cities")
+      return()
+    }
+    
+    title_text <- if (length(cities) <= 3) {
+      paste("Age Distribution in", paste(cities, collapse = ", "))
+    } else {
+      paste("Age distribution in", length(cities), "cities")
+    }
+    
+    hist(
+      matches$Age,
+      breaks = seq(20, 70, by = 5),
+      xlim = c(20, 70),
+      main = title_text,
+      xlab = "Age"
+    )
+  }
+  
+  ### CITY BOXPLOT LOGIC ###
+  
   output$name_city_boxplot <- renderPlot({
     d <- data()
     nm <- trimws(input$nameCityQuery)
@@ -263,68 +322,52 @@ server <- function(input, output, session) {
   })
 
   
-  
   output$city_summary <- renderTable({
+    city_summary_df()
+  })
+  
+  output$dl_city_summary <- downloadHandler(
+    filename = function() paste0("city_summary_", Sys.Date(), ".csv"),
+    content = function(file) {
+      out <- city_summary_df()
+      if (is.null(out)) out <- data.frame(Message = "No rows match the selected cities")
+      write.csv(out, file, row.names = FALSE)
+    }
+  )
+    
+  # city histogram output, download #
+  output$city_hist <- renderPlot({
+    d <- data()
     cities <- input$cityQuery
     
     if (is.null(cities) || length(cities) == 0) {
-      return(data.frame(
-        Statistic = c("n","% of total","Min", "Median", "Mean", "Max"),
-        Estimate = c("-", "-", "-", "-", "-", "-")
-      ))
+      plot.new()
+      return()
     }
     
-    d <- data()
-    matches <- d[d$City %in% cities, ]
-    if (nrow(matches) == 0) return(NULL)
-
-    ages <- matches$Age
-    n <- nrow(matches)
-    pct <- round (100*n/ nrow(d), 1)
-    
-    data.frame(
-      Statistic = c("n","% of total", "Min", "Median", "Mean", "Max"),
-      Estimate = c(n,
-                   paste(pct,"%",""),
-                   min(ages), 
-                   median(ages), 
-                   mean(ages), 
-                   max(ages))
-    )
+    plot_city_hist(d, cities)
   })
     
-  
-    output$city_hist <- renderPlot({
+  output$dl_city_hist <- downloadHandler(
+    filename = function() paste0("city_hist_", Sys.Date(), ".png"),
+    content = function(file) {
+      d <- data()
       cities <- input$cityQuery
       
+      png(file, width = 900, height = 600, res = 120)
       if (is.null(cities) || length(cities) == 0) {
         plot.new()
-        return()
-      }
-      
-      d <- data()
-      matches <- d[d$City %in% cities, ]
-      
-      if (nrow(matches) == 0) {
-        plot.new()
-        text(0.5,0.5, "")
-        return()
-      }
-      
-      title_text <- if(length(cities) <= 3) {
-        paste("Age Distribution in", paste(cities, collapse = ", "))
+        text(0.5, 0.5, "Select at least one city first")
       } else {
-        paste("Age distribution in", length(cities), "cities")
+        plot_city_hist(d, cities)
       }
-      
-      hist(
-        matches$Age,
-        breaks=10,
-        main = title_text,
-        xlab="Age"
-      )
-    })
-    
+      dev.off()
+    }
+  )
+  
+  
+  # city boxplot output, download #
+  
     output$name_city_boxplot_message <- renderUI({
       nm <- trimws(input$nameCityQuery)
       cities <- input$cityNameQuery
@@ -335,8 +378,6 @@ server <- function(input, output, session) {
         tags$p("Pick at least one city to generate a box plot", class = "subtitle")
       }
     })
-    
-    
     
     output$dl_boxplot <- downloadHandler(
       filename = function() paste0("name_city_boxplot_", Sys.Date(), ".png"),

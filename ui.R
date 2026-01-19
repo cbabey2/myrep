@@ -89,8 +89,13 @@ ui <- navbarPage(
             )
           )
         ),
-        column(3,tableOutput("city_summary")),
-        column(6,plotOutput("city_hist"))
+        column(3,
+               downloadButton("dl_city_summary", "Download City Summary (CSV)"),
+               tableOutput("city_summary")
+               ),
+        column(6, 
+               downloadButton("dl_city_hist", "Download City Histogram (PNG)"),
+               plotOutput("city_hist"))
         )
       )
     )
